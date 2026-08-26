@@ -97,7 +97,7 @@ And in October 1998, I received a reply. By regular ground mail.
 
 Inside was a short letter. Just a few essential lines:
 
-![Letter scan — the rejection](assets/scan-letter.jpg)
+![Letter scan — the rejection](assets/scan-letter.png)
 
 > "Although your submission is interesting, we have determined your product does not fit our current business needs."
 
