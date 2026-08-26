@@ -155,7 +155,7 @@ And yes, my VVD is still with me. It still makes me ask "How?" and "Why?" — ev
 
 ## Final
 
-I will be glad if this story resonates. If it touched you, I would be grateful for a retweet. The tweet can be found here: [link to the tweet].
+I will be glad if this story resonates. If it touched you, I would be grateful for a retweet. The tweet can be found here: [link to the tweet] (https://x.com/PushIndex98/status/2092650060819399045).
 
 If there is a reader who sees this story as not just a retrospective but an opportunity for collaboration or a new project, I am open to proposals. After all, Grabit was never born, but who knows what might happen in another 28 years?
 
