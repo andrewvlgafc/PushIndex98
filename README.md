@@ -91,7 +91,7 @@ The logic was simple. File monitoring? Windows? That meant Microsoft. I found a 
 
 And in October 1998, I received a reply. By regular ground mail.
 
-![Envelope scan — Microsoft, October 1998, Redmond, Washington](assets/scan-envelope.jpg)
+![Envelope scan — Microsoft, October 1998, Redmond, Washington](assets/scan-envelope.png)
 
 *An envelope from Microsoft, October 1998. Return address — Redmond, Washington.*
 
