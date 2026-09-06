@@ -1,6 +1,6 @@
 # In 1998, I proposed push-based search indexing to Microsoft. They rejected it.
 
-> I built a push-indexing prototype in rural Russia. Microsoft said no. Two decades later, the industry built it.
+> I built a push-indexing prototype in rural Russia. Microsoft said no. Two decades later, the industry built it. 
 
 In October 1998, an envelope from Redmond, Washington, landed in my mailbox in Velikiye Luki. Inside was a five-line letter: *"Although your submission is interesting, we have determined your product does not fit our current business needs."* It was a reply to my letter, in which I had pitched one idea to Microsoft.
 
