@@ -69,7 +69,9 @@ A few words on how I saw the technical solution back then — not to bore you. I
 
 So, how was the system supposed to work, and what was needed for it? By design, it needed to somehow detect changes in the site's file system and react to them. After some time, a scheme formed in my head. Here is what the prototype actually did, to the best of my recollection after nearly three decades:
 
-The core was a filesystem filter driver built with the Windows DDK. It sat below the I/O manager and watched for write operations via FindFirstChangeNotification (and later ReadDirectoryChangesW) on the web server directories. When a file changed, the driver intercepted the IRP_MJ_WRITE completion, mapped the physical file path to a URL via a configurable routing table, and triggered a user-mode service.
+The core was a filesystem filter driver built with the Windows DDK. Before settling on the driver approach, I had experimented with FindFirstChangeNotification and ReadDirectoryChangesW from the Win32 API, but ruled them out — they either lacked detail or required a visible user-mode process, which felt wrong for a server-side solution.
+The DDK approach was different: a kernel-mode filter driver that sat below the I/O manager and intercepted filesystem operations at the IRP level. When a write occurred, the driver caught the IRP_MJ_WRITE completion, mapped the physical file path to a URL via a configurable routing table, and triggered a user-mode service.
+
 
 That service did three things in sequence: (1) extracted visible text and anchor links from the HTML file using a lightweight parser I wrote because I couldn't fit a full browser engine on a Pentium 60 with 8MB RAM; (2) diffed the extracted content against the last known state stored in a local Berkeley DB index; (3) compressed only the delta using zlib and packaged it into a small binary payload with a custom header containing the URL, last-modified timestamp, and content-type.
 
