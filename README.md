@@ -102,6 +102,8 @@ Inside was a short letter. Just a few essential lines:
 > "Although your submission is interesting, we have determined your product does not fit our current business needs."
 
 In modern terms, I had been sent a polite "no thanks."
+> After publishing this story, I learned that push technology itself has much deeper roots than I realized in 1998 — going back to Xerox's 1987 paper "Epidemic Algorithms for Replicated Database Maintenance" and Netscape's server push in 1995. I had no access to academic databases on dial-up in rural Russia, so I was unaware of this prior art. This story is not about inventing push — it's about proposing it for web search indexing at a time when the industry was still purely pull-based, and being rejected anyway.
+
 
 So Microsoft said no. But I felt the idea had potential. And I also understood that it couldn't be realized without a major partner.
 
