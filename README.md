@@ -4,7 +4,7 @@
 
 In October 1998, an envelope from Redmond, Washington, landed in my mailbox in Velikiye Luki. Inside was a five-line letter: *"Although your submission is interesting, we have determined your product does not fit our current business needs."* It was a reply to my letter, in which I had pitched one idea to Microsoft.
 
-> After publishing this story, I learned that push technology itself has much deeper roots than I realized in 1998 — going back to Xerox's 1987 paper "Epidemic Algorithms for Replicated Database Maintenance" and Netscape's server push in 1995. I had no access to academic databases on dial-up in rural Russia, so I was unaware of this prior art. This story is not about inventing push — it's about proposing it for web search indexing at a time when the industry was still purely pull-based, and being rejected anyway.
+> After publishing this story, I learned that push technology itself has much deeper roots than I realized in 1998 — going back to Xerox's 1987 paper and Netscape's server push in 1995. I was not the first to think of push. I tried to apply it to web search indexing — and built a working prototype for it. I had no access to academic databases on dial-up in rural Russia, so I was unaware of this prior art.
 
 But let's start from the beginning.
 
