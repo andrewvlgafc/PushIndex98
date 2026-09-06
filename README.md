@@ -70,6 +70,7 @@ A few words on how I saw the technical solution back then — not to bore you. I
 So, how was the system supposed to work, and what was needed for it? By design, it needed to somehow detect changes in the site's file system and react to them. After some time, a scheme formed in my head. Here is what the prototype actually did, to the best of my recollection after nearly three decades:
 
 The core was a filesystem filter driver built with the Windows DDK. Before settling on the driver approach, I had experimented with FindFirstChangeNotification and ReadDirectoryChangesW from the Win32 API, but ruled them out — they either lacked detail or required a visible user-mode process, which felt wrong for a server-side solution.
+
 The DDK approach was different: a kernel-mode filter driver that sat below the I/O manager and intercepted filesystem operations at the IRP level. When a write occurred, the driver caught the IRP_MJ_WRITE completion, mapped the physical file path to a URL via a configurable routing table, and triggered a user-mode service.
 
 
