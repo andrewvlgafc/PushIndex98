@@ -4,6 +4,8 @@
 
 In October 1998, an envelope from Redmond, Washington, landed in my mailbox in Velikiye Luki. Inside was a five-line letter: *"Although your submission is interesting, we have determined your product does not fit our current business needs."* It was a reply to my letter, in which I had pitched one idea to Microsoft.
 
+> After publishing this story, I learned that push technology itself has much deeper roots than I realized in 1998 — going back to Xerox's 1987 paper "Epidemic Algorithms for Replicated Database Maintenance" and Netscape's server push in 1995. I had no access to academic databases on dial-up in rural Russia, so I was unaware of this prior art. This story is not about inventing push — it's about proposing it for web search indexing at a time when the industry was still purely pull-based, and being rejected anyway.
+
 But let's start from the beginning.
 
 My name is Andrey. I'm from a small town called Velikiye Luki in Russia. I'm 47 years old now. I work as a programmer and system administrator at a state educational institution. Not long ago, while sorting through old papers, I came across a letter dated 1998. I read it, remembered its story, and decided to tell it to you. I think it will interest many readers. At least, I hope so.
@@ -57,31 +59,34 @@ For some reason, I really disliked that idea. Maybe it was the VVD spurring my t
 
 My mind, and partly my VVD, reacted strongly: this was no good. It was as absurd as a mailman walking door-to-door every day asking, "Do you have anything to send?" instead of just waiting for people to bring their letters to the post office.
 
-Back then, I did not know this was called pull architecture. I just felt the current architecture was not optimal. Now I understand my idea was an attempt to flip pull and create push.
+Back then, I did not know this was called pull architecture. I just felt the current architecture was not optimal. Now I understand my approach was an attempt to flip the pull model and apply the already-known push concept to search engines specifically.
 
-And so, in an instant, the idea was born. I started from the assumption that most websites at the time were static. Or, let's say, pseudo-dynamic. Those simply generated a static page file after some information in a database changed. By the way, many of my acquaintances who manage industry portals still do this today. Most of the site is pure static content that gets regenerated after changes in the database. Or, alternatively, on a schedule. I did not consider purely dynamic sites back then. But I suppose an adequate technical solution could have been found for them too.
+And so, in an instant, the idea of applying push architecture to web search indexing was born. I started from the assumption that most websites at the time were static. Or, let's say, pseudo-dynamic. Those simply generated a static page file after some information in a database changed. By the way, many of my acquaintances who manage industry portals still do this today. Most of the site is pure static content that gets regenerated after changes in the database. Or, alternatively, on a schedule. I did not consider purely dynamic sites back then. But I suppose an adequate technical solution could have been found for them too.
 
 ## The Technical Part
 
 A few words on how I saw the technical solution back then — not to bore you. I was genuinely trying to find a technical implementation of the idea. I dug through documentation, the internet, and SDKs.
 
-So, how was the system supposed to work, and what was needed for it? By design, it needed to somehow detect changes in the site's file system and react to them. After some time, a scheme formed in my head. A certain program, a driver, would monitor the file system. As soon as it noticed changes in the directory belonging to the web server, it would catch the name of the changed file, map it to a URL, and prepare the file's content for sending — if it was an HTML file.
+So, how was the system supposed to work, and what was needed for it? By design, it needed to somehow detect changes in the site's file system and react to them. After some time, a scheme formed in my head. Here is what the prototype actually did, to the best of my recollection after nearly three decades:
 
-What does "prepare" mean? After receiving the names of changed or new files, the plan was to preprocess their content directly on the host: extract text, headings, links, tags, compress it all — and only then send it to the search engine.
+The core was a filesystem filter driver built with the Windows DDK. It sat below the I/O manager and watched for write operations via FindFirstChangeNotification (and later ReadDirectoryChangesW) on the web server directories. When a file changed, the driver intercepted the IRP_MJ_WRITE completion, mapped the physical file path to a URL via a configurable routing table, and triggered a user-mode service.
 
-After long searches on the internet over a dial-up connection (quite a quest!), I found two functions in Windows as candidates for implementing the idea. They were `FindFirstChangeNotification` and `ReadDirectoryChangesW`. The first one was ruled out immediately because it only gave the fact of a change without details. The second was more interesting for my task. It was very hard to find the necessary SDK, but I found it. After some small experiments with C++ code and these functions, I rejected this option too. I don't remember exactly why, but most likely because all the functionality took the form of a program with a visible interface. For some reason, I didn't like that. At the very least, it didn't feel universal if you looked at the whole technology from the point of view that it should work cross-platform in the future.
+That service did three things in sequence: (1) extracted visible text and anchor links from the HTML file using a lightweight parser I wrote because I couldn't fit a full browser engine on a Pentium 60 with 8MB RAM; (2) diffed the extracted content against the last known state stored in a local Berkeley DB index; (3) compressed only the delta using zlib and packaged it into a small binary payload with a custom header containing the URL, last-modified timestamp, and content-type.
 
-So I started digging in another direction. The choice fell on the DDK (Driver Development Kit). It also allowed directory monitoring, but as a driver. It was a bit more complicated in terms of code and its volume, but at the time it seemed like a more practical solution.
+The payload was then pushed over a plain TCP socket to a listener on the search engine side. I used TCP because it was straightforward and available. The "innovation" was not the transport protocol but the inversion of the control flow: instead of the search engine asking "what changed," the host announced "here is exactly what changed, pre-processed and ready to index."
+
+The whole pipeline ran on a Pentium 60 with Windows NT 4.0 and 8MB RAM. The hardest part was not the TCP connection — that was straightforward — but making the filesystem monitoring reliable enough that we didn't miss rapid successive writes or double-notify on temp files created by editors like FrontPage.
+> (It's been 28 years, so I may be misremembering minor specifics, but this was the general architecture.)
 
 I chose Windows because it was the platform I knew, the one I could "touch." Microsoft felt like a natural candidate. I didn't think about Linux and Apache back then — not because they were worse, but because I was a kid from Velikiye Luki, and my world ended where Microsoft documentation ended.
 
 It was a conscious choice in favor of the Microsoft ecosystem. Although I believe that with further project development, we would have found technical solutions for other platforms as well.
 
-At the time, this solution to the problem felt the most logical to me. I wasn't trying to invent a new architecture, and of course I didn't know terms like push indexing, incremental indexing, or edge computing. Only many years later did I understand that these concepts now describe many elements of the idea I was trying to implement back then.
+At the time, this solution to the problem felt the most logical to me. I wasn't trying to invent a new architecture — I was applying a known concept to a specific problem — and of course I didn't know terms like push indexing, incremental indexing, or edge computing. Only many years later did I understand that these concepts now describe many elements of the idea I was trying to implement back then.
 
 I didn't consider that scheme the only possible one. It was an idea with an attempt at implementation — a first approximation. If people with experience and money had been nearby, the architecture would surely have changed, maybe even for the better. But the essence — that the site itself would notify the search engine about changes — would have remained unchanged.
-
 Even now, I can't say for sure whether VVD made me see that inefficiency, or whether the inefficiency I saw triggered another round of VVD. The cause-and-effect relationship is still unclear to me. But I know one thing for sure: once my brain latched onto a problem, there was no rest. I had to do something. Not because I was confident of success — but because stopping was impossible.
+
 
 ## The Letter to Microsoft
 
@@ -102,7 +107,7 @@ Inside was a short letter. Just a few essential lines:
 > "Although your submission is interesting, we have determined your product does not fit our current business needs."
 
 In modern terms, I had been sent a polite "no thanks."
-> After publishing this story, I learned that push technology itself has much deeper roots than I realized in 1998 — going back to Xerox's 1987 paper "Epidemic Algorithms for Replicated Database Maintenance" and Netscape's server push in 1995. I had no access to academic databases on dial-up in rural Russia, so I was unaware of this prior art. This story is not about inventing push — it's about proposing it for web search indexing at a time when the industry was still purely pull-based, and being rejected anyway.
+
 
 
 So Microsoft said no. But I felt the idea had potential. And I also understood that it couldn't be realized without a major partner.
@@ -143,11 +148,11 @@ That is how my attempts to bring the idea to life ended. Grabit never happened.
 
 More than 28 years have passed. I work as a system administrator, program in React and Node.js, live with the same VVD — sometimes it knocks me out for a day or two, but I'm used to it. And then, while sorting through old papers, I found that same letter from Microsoft.
 
-And unexpectedly, I realized that the idea that once seemed to me just a logical technical solution had, over the years, acquired quite recognizable names.
+And unexpectedly, I realized that the approach that once seemed to me just a logical technical solution had, over the years, acquired quite recognizable names. The push concept itself was not new — as I later learned, it had roots going back to the 1980s — but its application to web search indexing at that particular moment in time was what made the proposal specific.
 
 Google arrived at a similar model with PubSubHubbub (now WebSub). Microsoft and Yandex launched the **IndexNow** protocol in 2021. Cloudflare built it into its platform and automatically notifies search engines about changes. And back then, in '98, everything could have gone differently.
 
-I don't know whether the world reinvented what I had proposed. I don't know whether search development would have taken a different path if Microsoft had answered differently. History has no subjunctive mood. But when I look at modern cloud technologies and push notifications, I understand: the idea was right. It just came 15–20 years earlier than the world was ready to accept it.
+I don't know whether the world independently arrived at the same application of an already-known concept, or whether my proposal was simply too early for an industry still invested in crawling. I don't know whether search development would have taken a different path if Microsoft had answered differently. History has no subjunctive mood. But one thing is clear: even a straightforward application of a known idea to a specific problem can be rejected if it doesn't fit "current business needs." But when I look at modern cloud technologies and push notifications, I understand: the idea was right. It just came 15–20 years earlier than the world was ready to accept it.
 
 I didn't earn a cent from this. I didn't become famous. I have no proof — only memory and that same letter. But it seems to me that's enough.
 
